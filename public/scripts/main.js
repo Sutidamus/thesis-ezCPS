@@ -102,7 +102,7 @@ const uuid = new URLSearchParams(window.location.search).get("uuid");
 //var curEnv = lips.env;
 var questions = [
   {
-    description: "Calculate and return the factorial of n",
+    description: "Calculate and return the factorial of n. Expects n (a number) and k (a continuation) as parameters",
     difficulty: 1,
     extraSubstantialProcedures: ["+", "-", "map", "append"],
     baseProc: 
@@ -131,6 +131,7 @@ var questions = [
       },
     ],
     timeLimit: 30000,
+    nonCPSName: "Factorial"
   },
 
   {
@@ -148,6 +149,17 @@ var questions = [
     functionName: "member-cps",
     arguments: "(ch ls k)",
     timeLimit: 30000,
+    nonCPSName: "Member?",
+    baseProc: 
+    `
+    (define member? (lambda (ch ls))
+      (cond 
+        [(null? ls) #f]
+        [(equal? (car ls) ch) #t]
+        [else (member? ch (cdr ls))]
+      )
+    )
+    `
   },
 ];
 var questionNumber = 1;
@@ -505,6 +517,8 @@ function updateUIWithByQuestion(questionNumber) {
     extraSubstantialProcedures,
     arguments,
     functionName,
+    nonCPSName,
+    baseProc
   } = currentQuestion;
 
   console.log("Description: ", description);
@@ -518,7 +532,8 @@ function updateUIWithByQuestion(questionNumber) {
   document.querySelector("#problemDescription").innerHTML = description;
 
   let substantialProcs = document.querySelector("#substantialProcedureList");
-
+  document.querySelector("#nonCPSProcName").textContent = nonCPSName;
+  document.querySelector("#nonCPSImplementation").innerHTML = baseProc;
   substantialProcs.innerHTML = "";
 
   extraSubstantialProcedures.forEach((procID) => {
