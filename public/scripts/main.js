@@ -102,11 +102,11 @@ const uuid = new URLSearchParams(window.location.search).get("uuid");
 //var curEnv = lips.env;
 var questions = [
   {
-    description: "Calculate and return the factorial of n. Expects n (a number) and k (a continuation) as parameters",
+    description:
+      "Calculate and return the factorial of n. Expects n (a number) and k (a continuation) as parameters",
     difficulty: 1,
     extraSubstantialProcedures: ["+", "-", "map", "append"],
-    baseProc: 
-    `(define factorial 
+    baseProc: `(define factorial 
         (lambda (n)
           (if (or (eq? 0 n) (eq? 1 n))
             1
@@ -131,7 +131,7 @@ var questions = [
       },
     ],
     timeLimit: 30000,
-    nonCPSName: "Factorial"
+    nonCPSName: "Factorial",
   },
 
   {
@@ -150,8 +150,7 @@ var questions = [
     arguments: "(ch ls k)",
     timeLimit: 30000,
     nonCPSName: "Member?",
-    baseProc: 
-    `
+    baseProc: `
     (define member? (lambda (ch ls))
       (cond 
         [(null? ls) #f]
@@ -159,7 +158,7 @@ var questions = [
         [else (member? ch (cdr ls))]
       )
     )
-    `
+    `,
   },
 ];
 var questionNumber = 1;
@@ -200,7 +199,10 @@ const htmlToElement = (html) => {
 //   let closestInd = posMin(nextCParenLoc, nextOParenLoc);
 //   closestInd >= 0 ?
 // }
-
+function clearTheConsole() {
+  document.querySelector("#codeConsole").value = "";
+  codeConsole.value = "";
+}
 async function checkTailCallSequentially(
   codeBlocksPromises,
   callbackFunc,
@@ -330,7 +332,11 @@ function alertBS(status) {
         '<div class="alert alert-' +
         "info" +
         ' alert-dismissible" role="alert">' +
-        `${COLLECT_DATA ? "Loading...Submitting Code to Firebase" : "Loading...skipping server submission."}`;
+        `${
+          COLLECT_DATA
+            ? "Loading...Submitting Code to Firebase"
+            : "Loading...skipping server submission."
+        }`;
       break;
 
     case submissionState.NO_TAIL:
@@ -389,7 +395,7 @@ function alertTailFeedback(status) {
         `<h4 class="alert-heading">IN TAIL FORM? <b>NO!</b></h4>
             <h5>The code you submitted NOT in CPS form! The following calls are in non-tail position.</h5>
             <ul>
-              ${nonTailCalls.map(rator => `<li>${rator.id}</li>`)}
+              ${nonTailCalls.map((rator) => `<li>${rator.id}</li>`)}
             </ul>`;
       break;
 
@@ -518,7 +524,7 @@ function updateUIWithByQuestion(questionNumber) {
     arguments,
     functionName,
     nonCPSName,
-    baseProc
+    baseProc,
   } = currentQuestion;
 
   console.log("Description: ", description);
@@ -857,6 +863,8 @@ function submitToFirebaseAndMove(passFailTestResults) {
   let timeRemaining = document.querySelector("#countdownTimer").innerHTML;
   let minSec = timeRemaining.split(":").map(parseFloat);
 
+  clearTheConsole();
+
   let submission = {
     code: rawCode,
     uuid: uuid,
@@ -873,19 +881,6 @@ function submitToFirebaseAndMove(passFailTestResults) {
       .add(submission)
       .then((docId) => {
         console.log("Successful Submission: ", docId);
-        // let inTailForm =
-        //   nonTailCalls.length == 0
-        //     ? submissionState.IN_TAIL
-        //     : submissionState.NO_TAIL;
-
-        // if (nonTailCalls.length == 1) {
-        //   inTailForm =
-        //     nonTailCalls[0].id == "error-no-define"
-        //       ? submissionState.NO_CHECK_TAIL
-        //       : inTailForm;
-        // }
-
-        // alertBS(inTailForm);
         showTailFeedback(1);
         questionNumber++;
         setTimeout(() => {
@@ -937,19 +932,7 @@ function submitToFirebase(passFailTestResults) {
         document.querySelector("#submitCodeBtn").disabled = false;
 
         console.log("Successful Submission: ", docId);
-        // let inTailForm =
-        //   nonTailCalls.length == 0
-        //     ? submissionState.IN_TAIL
-        //     : submissionState.NO_TAIL;
 
-        // if (nonTailCalls.length == 1) {
-        //   inTailForm =
-        //     nonTailCalls[0].id == "error-no-define"
-        //       ? submissionState.NO_CHECK_TAIL
-        //       : inTailForm;
-        // }
-
-        // alertBS(inTailForm);
         showTailFeedback(0);
       })
       .catch((e) => {
