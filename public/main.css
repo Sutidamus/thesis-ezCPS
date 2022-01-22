@@ -1,0 +1,96 @@
+#contain {
+    position: relative;
+}
+
+#countdownTimer{}
+
+#editorContainer {
+    grid-area: editor;
+    position: relative;
+}
+
+/* #testCaseCard {
+    display: none;
+} */
+
+#tailCallFeedback{
+    display: none;
+}
+#mainDiv {
+    display: grid;
+    grid-template-areas: "editor tests";
+    grid-template-columns:50% auto;
+}
+
+#testOutput {
+    grid-area: tests;
+}
+
+#editor {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#editorBody > div {
+    margin: 0;
+}
+
+header {
+    margin-left: 1%;
+}
+
+#expectedOutput {
+    margin-top: 2%;
+}
+
+#substantialProcedureList li {
+    display: inline-block;
+    padding: 0 10px;
+}
+
+/* #runCodeBtn{
+    margin-top: 1%;
+} */
+
+#buttonContainer {
+    margin-top: 1%;
+    margin-left: 2%;
+}
+
+#menuBody > div {
+    margin: auto;
+    background-color: rgb(183, 232, 253);
+}
+#selectLabel {
+    font-size: 30px;
+}
+
+#dataLabel {
+    font-size: 30px;
+}
+#groupSelect {
+    margin: auto;
+}
+
+#btnRow {
+    margin-left: 2%;
+    margin-top: 1%;
+}
+
+table {
+    display: none;
+    margin-left: 19%;
+}
+
+textarea {
+    margin-left: 20%;
+}
+
+.explainP {
+    font-size: 24px;
+}
+
+#siteTitle {
+    font-size: 60px;
+}
