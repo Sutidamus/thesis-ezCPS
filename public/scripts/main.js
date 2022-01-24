@@ -82,6 +82,8 @@ var originalPrimProcs = [
   "eqv?",
   "list-tail",
   "quote",
+  "apply-k",
+  "make-k"
 ];
 var primProcsJS = [...originalPrimProcs];
 var editorBodies = [];
@@ -130,7 +132,7 @@ var questions = [
         expectedOutput: "'(6)",
       },
     ],
-    timeLimit: 30000,
+    timeLimit: 300000,
     nonCPSName: "Factorial",
   },
 
@@ -148,7 +150,7 @@ var questions = [
     ],
     functionName: "member-cps",
     arguments: "(ch ls k)",
-    timeLimit: 30000,
+    timeLimit: 300000,
     nonCPSName: "Member?",
     baseProc: `
     (define member? (lambda (ch ls))
@@ -367,7 +369,7 @@ function alertBS(status) {
   }
 
   alertPlaceholder.innerHTML = "";
-  alertPlaceholder.append(wrapper);
+  alertPlaceholder.appendChild(wrapper);
 }
 
 function alertTailFeedback(status) {
@@ -384,7 +386,7 @@ function alertTailFeedback(status) {
         "success" +
         ' alert-dismissible" role="alert">' +
         `<h4 class="alert-heading">IN TAIL FORM? <b>YES!</b></h4>
-            <h5>The code you submitted was in CPS form!</h5>`;
+            <h5>The code you submitted has no non-taill calls to substantial procedures!</h5>`;
       break;
 
     case submissionState.NO_TAIL:
@@ -393,9 +395,9 @@ function alertTailFeedback(status) {
         "danger" +
         ' alert-dismissible" role="alert">' +
         `<h4 class="alert-heading">IN TAIL FORM? <b>NO!</b></h4>
-            <h5>The code you submitted NOT in CPS form! The following calls are in non-tail position.</h5>
+            <h5>The code you submitted contains the following substantial procedure calls in NON-tail position:</h5>
             <ul>
-              ${nonTailCalls.map((rator) => `<li>${rator.id}</li>`)}
+              ${nonTailCalls.map((rator) => `<li class="nonTailCall">${rator.id}</li>`)}
             </ul>`;
       break;
 
@@ -414,7 +416,7 @@ function alertTailFeedback(status) {
   }
 
   alertPlaceholder.innerHTML = "";
-  alertPlaceholder.append(wrapper);
+  alertPlaceholder.appendChild(wrapper);
 }
 
 function setup() {}
@@ -895,7 +897,7 @@ function submitToFirebaseAndMove(passFailTestResults) {
     code: rawCode,
     uuid: uuid,
     group: GROUP_NUMBER,
-    timeRemaining: minSec[0] * 60 + minSec[1],
+    timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
     testResults: passFailTestResults,
   };

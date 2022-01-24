@@ -94,3 +94,7 @@ textarea {
 #siteTitle {
     font-size: 60px;
 }
+
+pre {
+	width: 500px;
+}

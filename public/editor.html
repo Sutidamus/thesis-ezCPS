@@ -433,9 +433,14 @@
       <p id="problemDescription">Determine if passed parameter is a set.</p>
       <hr />
       <div id="nonCPSForm">
-        <h4>Here is a <b>non-CPS implementation of <u><span id="nonCPSProcName"></span></u></b></h4>
+        <h4>
+          Here is a
+          <b
+            >non-CPS implementation of <u><span id="nonCPSProcName"></span></u
+          ></b>
+        </h4>
         <pre id="nonCPSImplementation"></pre>
-        <h4><b>Transform this procedure to CPS form</b></h4>
+        <h4 style="color: rgb(0, 135, 197);"><b>Transform this procedure to CPS form</b></h4>
         <hr />
         <p>
           <u>For this problem, the following are substantial procedures:</u>
@@ -447,7 +452,9 @@
         Time Remaining: <span id="countdownTimer"></span>
       </h4>
     </header>
+
     <div class="container">
+      <div id="liveAlertPlaceholder"></div>
       <div id="mainDiv">
         <div id="editorContainer">
           <div id="editor"></div>
@@ -460,13 +467,12 @@
             </button>
           </div>
         </div>
-
         <div id="testOutput">
           <!-- <label for="codeConsole">CONSOLE</label> -->
           <textarea
             id="codeConsole"
             disabled
-            placeholder="Making my way downtown"
+            placeholder="Code results with show here."
             style="width: 423px; height: 121px"
           ></textarea>
           <h3 class="text-center">Test Cases</h3>
@@ -488,9 +494,6 @@
           </div>
         </div>
       </div>
-    
-
-      <div id="liveAlertPlaceholder"></div>
       <!-- <button type="button" class="btn btn-primary" id="liveAlertBtn">
         Show live alert
       </button> -->
