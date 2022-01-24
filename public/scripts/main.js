@@ -876,10 +876,6 @@ function onSubmit() {
 }
 
 function showTailFeedback(submitAndMove) {
-  if(GROUP_NUMBER == 1){
-    alertBS();
-    return;
-  }
 
   let inTailForm =
     nonTailCalls.length == 0
@@ -891,6 +887,11 @@ function showTailFeedback(submitAndMove) {
       nonTailCalls[0].id == "error-no-define"
         ? submissionState.NO_CHECK_TAIL
         : inTailForm;
+  }
+
+  if(GROUP_NUMBER == 1){
+    submitAndMove ? alertBS(inTailForm) : alertBS();
+    return;
   }
 
   submitAndMove ? alertBS(inTailForm) : alertTailFeedback(inTailForm);

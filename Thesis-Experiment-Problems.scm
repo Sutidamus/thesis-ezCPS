@@ -4,7 +4,7 @@
     (if (or (eq? n 1) (eq? n 0))
         (apply-k k 1)
         (factorial-cps (- n 1) (make-k (lambda (computed-fact)
-            (* n computed-fact)
+           (apply-k k (* n computed-fact))
         )))
     ))
 )
