@@ -97,7 +97,7 @@ const COLLECT_DATA = parseInt(
 const uuid = new URLSearchParams(window.location.search).get("uuid");
 
 // const { default: lips } = require("@jcubic/lips");
-
+// var timeLeft = 0;
 // const { default: lips } = require("@jcubic/lips");
 //var curEnv = lips.env;
 var questions = [
@@ -164,7 +164,7 @@ var questions = [
 var questionNumber = 1;
 var intervalID = 0;
 var timerIntervalID = 0;
-var remainingTime = 0;
+var globalTimeRemaining = 0;
 var { exec, parse } = lips;
 var curTestCases = [];
 const htmlToElement = (html) => {
@@ -511,6 +511,7 @@ function processTestResults(results, args) {
 function updateUIWithByQuestion(questionNumber) {
   document.querySelector("#submitCodeBtn").disabled = false;
   document.querySelector("#runCodeBtn").disabled = false;
+  let testCaseTbody = document.querySelector("tbody");
 
   let currentQuestion = questions[questionNumber - 1];
 
@@ -526,7 +527,7 @@ function updateUIWithByQuestion(questionNumber) {
     nonCPSName,
     baseProc,
   } = currentQuestion;
-
+  globalTimeRemaining = timeLimit/1000;
   console.log("Description: ", description);
   console.log("Difficulty: ", difficulty);
   console.log("name: ", name);
@@ -552,7 +553,7 @@ function updateUIWithByQuestion(questionNumber) {
   //Clear text editor
   ace.edit("editor").setValue("");
 
-  document.querySelector("table").style.display = "none";
+  // document.querySelector("table").style.display = "none";
   document.querySelector("tbody").innerHTML = "";
 
   if (GROUP_NUMBER == 2) {
@@ -566,10 +567,33 @@ function updateUIWithByQuestion(questionNumber) {
 
   //testCaseTable
   curTestCases = testCases;
+
+  testCases.forEach((tc, ind) => {
+    let row = testCaseTbody.insertRow();
+    let passFail = row.insertCell(0);
+    let testCaseText = row.insertCell(1);
+    let actual = row.insertCell(2);
+    let expected = row.insertCell(3);
+
+    passFail.id = `testCase${ind}Pass`;
+    actual.id = `testCase${ind}Actual`;
+    expected.id = `testCase${ind}Expected`;
+
+    testCaseText.innerHTML = tc.code;
+    expected.innerHTML = tc.expectedOutput;
+    actual.innerHTML = "-";
+    passFail.innerHTML = "-";
+
+    console.log("Pushing test case promise!!!");
+  });
+  
   updateTimer(timeLimit);
 }
 
 function onCodeRun() {
+  clearInterval(timerIntervalID);
+  clearInterval(intervalID);
+
   let currentQuestion = questions[questionNumber - 1];
   document.querySelector("#submitCodeBtn").disabled = true;
   document.querySelector("#runCodeBtn").disabled = true;
@@ -754,6 +778,8 @@ function onCodeErrorRun(en, rawCode) {
 }
 
 function onSubmit() {
+  clearInterval(timerIntervalID);
+  clearInterval(intervalID);
   let currentQuestion = questions[questionNumber - 1];
   document.querySelector("#submitCodeBtn").disabled = true;
   document.querySelector("#runCodeBtn").disabled = true;
@@ -910,14 +936,14 @@ function submitToFirebaseAndMove(passFailTestResults) {
 function submitToFirebase(passFailTestResults) {
   let editor = ace.edit("editor");
   let rawCode = editor.getValue();
-  let timeRemaining = document.querySelector("#countdownTimer").innerHTML;
-  let minSec = timeRemaining.split(":").map(parseFloat);
+  // let timeRemaining = document.querySelector("#countdownTimer").innerHTML;
+  // let minSec = timeRemaining.split(":").map(parseFloat);
 
   let submission = {
     code: rawCode,
     uuid: uuid,
     group: GROUP_NUMBER,
-    timeRemaining: minSec[0] * 60 + minSec[1],
+    timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
     testResults: passFailTestResults,
   };
@@ -934,6 +960,7 @@ function submitToFirebase(passFailTestResults) {
         console.log("Successful Submission: ", docId);
 
         showTailFeedback(0);
+        updateTimer(globalTimeRemaining*1000)
       })
       .catch((e) => {
         document.querySelector("#runCodeBtn").disabled = false;
@@ -949,12 +976,14 @@ function submitToFirebase(passFailTestResults) {
 
           alertTailFeedback(inTailForm);
         } else alertBS();
+        updateTimer(globalTimeRemaining*1000)
       });
   } else {
     document.querySelector("#runCodeBtn").disabled = false;
     document.querySelector("#submitCodeBtn").disabled = false;
 
     showTailFeedback(0);
+    updateTimer(globalTimeRemaining*1000)
   }
 }
 
@@ -966,28 +995,26 @@ function updateTimer(timeLimit) {
 
   intervalID = setInterval(() => {
     onSubmit();
-  }, timeLimit + 1000);
+  }, (globalTimeRemaining * 1000)+1000);
 
-  let now = new Date().getTime();
-  let countDownDate = now + timeLimit + 1000;
+  // let now = new Date().getTime();
+  // let countDownDate = now + timeLimit;
 
   timerIntervalID = setInterval(() => {
-    let now = new Date().getTime();
-    // Find the distance between now and the count down date
-    let distance = countDownDate - now;
+    globalTimeRemaining--;
 
-    let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    let minutes = Math.floor(globalTimeRemaining/60);;
+    let seconds = globalTimeRemaining%60;
 
-    if (minutes >= 0 && seconds >= 0) {
-      let minuteText = minutes < 10 ? "0" + minutes : minutes;
-      let secondText = seconds < 10 ? "0" + seconds : seconds;
+    let secondsText = seconds;
+    secondsText = seconds < 10 ? `0${seconds}`: secondsText;
 
+    if (globalTimeRemaining >= 0) {
       document.querySelector(
         "#countdownTimer"
-      ).innerHTML = `${minuteText}:${secondText}`;
+      ).innerHTML = `${minutes}:${secondsText}`;
     }
-  }, 500);
+  }, 1000);
 }
 
 function main() {

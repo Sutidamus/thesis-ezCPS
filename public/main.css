@@ -79,7 +79,7 @@ header {
 }
 
 table {
-    display: none;
+    display: block;
     margin-left: 19%;
 }
 
