@@ -91,6 +91,7 @@ var originalPrimProcs = [
   "make-k",
   "or"
 ];
+
 var primProcsJS = [...originalPrimProcs];
 var editorBodies = [];
 
@@ -146,7 +147,7 @@ var questions = [
     description:
       "Returns true if x is an element of the list, and false otherwise. ",
     difficulty: 2,
-    extraSubstantialProcedures: ["cons", "pair?"],
+    extraSubstantialProcedures: ["pair?"],
     name: "Member-CPS",
     testCases: [
       {
@@ -164,6 +165,44 @@ var questions = [
         [(null? ls) #f]
         [(equal? (car ls) ch) #t]
         [else (member? ch (cdr ls))]
+      )
+    )
+    `,
+  },
+
+  {
+    description:
+      "Determine is the given list is a set. Takes a list and continuation as arguments.",
+    difficulty: 2,
+    extraSubstantialProcedures: ["member"],
+    name: "Set-CPS",
+    testCases: [
+      {
+        code: "(set?-cps '(b c d 1 2 3 a) list)",
+        expectedOutput: "'(#t)",
+      },
+      {
+        code: "(set?-cps '(b c d (a) 2 b a) (lambda(v)(cons v '())) )",
+        expectedOutput: "'(#f)",
+      },
+      {
+        code: "(set?-cps '(y 2 2 g z) (lambda (v) (if v 'cat 'dog)) )",
+        expectedOutput: "'dog",
+      }
+    ],
+    functionName: "set?-cps",
+    arguments: "(ls k)",
+    timeLimit: 300000,
+    nonCPSName: "set?",
+    baseProc: `
+    (define set? (lambda (ls))
+      (cond 
+        [(null? ls) #t]
+        [(not (pair? ls)) #f]
+        [else (if (member? (car ls) (cdr ls))
+          #f
+          (set? (cdr ls))
+          )]
       )
     )
     `,
@@ -551,6 +590,7 @@ function updateUIWithByQuestion(questionNumber) {
   document.querySelector("#nonCPSImplementation").innerHTML = baseProc;
   substantialProcs.innerHTML = "";
 
+  primProcsJS = originalPrimProcs;
   extraSubstantialProcedures.forEach((procID) => {
     substantialProcs.appendChild(htmlToElement(`<li>${procID}</li>`));
     primProcsJS = primProcsJS.filter((v) => v != procID);
