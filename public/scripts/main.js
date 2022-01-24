@@ -113,7 +113,7 @@ var questions = [
     description:
       "Calculate and return the factorial of n. Expects n (a number) and k (a continuation) as parameters",
     difficulty: 1,
-    extraSubstantialProcedures: ["+", "-", "map", "append"],
+    extraSubstantialProcedures: ["+", "map", "append"],
     baseProc: `(define factorial 
         (lambda (n)
           (if (or (eq? 0 n) (eq? 1 n))
@@ -146,12 +146,12 @@ var questions = [
     description:
       "Returns true if x is an element of the list, and false otherwise. ",
     difficulty: 2,
-    extraSubstantialProcedures: ["cons", "pair?", "null?"],
+    extraSubstantialProcedures: ["cons", "pair?"],
     name: "Member-CPS",
     testCases: [
       {
         code: "(member-cps 'a '(b c d 1 2 3 a) list)",
-        expectedOutput: "'(t)",
+        expectedOutput: "'(#t)",
       },
     ],
     functionName: "member-cps",

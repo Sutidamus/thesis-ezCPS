@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CPS - Set</title>
+    <title>EZ-CPS: TESTING</title>
     <!-- <script src="browserfs.min.js"></script> -->
     <script
       src="https://cdn.jsdelivr.net/npm/@jcubic/lips@beta/dist/lips.js"
@@ -343,7 +343,6 @@
               [(app-exp? exp)
                   (if (var-exp? exp.rator)
                       (cond
-                          [(equal? exp.rator.id "case") (case-parse (car exp.rands) (cdr exp.rands))]
                           [(equal? exp.rator.id "or") (if (null? exp.rands)
                              (new lit-exp #f)
                              (if (null? (cdr exp.rands))
