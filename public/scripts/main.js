@@ -139,7 +139,7 @@ var questions = [
         expectedOutput: "'(6)",
       },
     ],
-    timeLimit: 300000,
+    timeLimit: 3600000,
     nonCPSName: "Factorial",
   },
 
@@ -157,7 +157,7 @@ var questions = [
     ],
     functionName: "member-cps",
     arguments: "(ch ls k)",
-    timeLimit: 300000,
+    timeLimit: 3600000,
     nonCPSName: "Member?",
     baseProc: `
     (define member? (lambda (ch ls))
@@ -192,7 +192,7 @@ var questions = [
     ],
     functionName: "set?-cps",
     arguments: "(ls k)",
-    timeLimit: 300000,
+    timeLimit: 3600000,
     nonCPSName: "set?",
     baseProc: `
     (define set? (lambda (ls))
@@ -230,7 +230,7 @@ var questions = [
     ],
     functionName: "insert-correctly-cps",
     arguments: "(num ls k)",
-    timeLimit: 300000,
+    timeLimit: 3600000,
     nonCPSName: "insert-correctly",
     baseProc: `
     (define insert-correctly (lambda (num ls)

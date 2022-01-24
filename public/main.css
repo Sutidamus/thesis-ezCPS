@@ -98,3 +98,7 @@ textarea {
 pre {
 	width: 500px;
 }
+
+#countdown { 
+    display: none;
+}
