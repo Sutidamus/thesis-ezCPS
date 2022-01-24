@@ -207,6 +207,48 @@ var questions = [
     )
     `,
   },
+
+  {
+    description:
+      "Inserts a given number into its correct place in the list. Assume the list is ordered. Expects a number, list, and continuation as arguments.",
+    difficulty: 2,
+    extraSubstantialProcedures: ["member"],
+    name: "Insert-Correctly",
+    testCases: [
+      {
+        code: "(insert-correctly 1 '(2 3 3 4 7) (lambda (v) v))",
+        expectedOutput: "'(1 2 3 3 4 7)",
+      },
+      {
+        code: "(insert-correctly 10 '(1 2 3 4 12 25 70) list)",
+        expectedOutput: "'((1 2 3 4 10 12 25 70))",
+      },
+      {
+        code: "(insert-correctly 10 '(1 2 3 4 12 25 70) (lambda (v) (map (lambda (x) (* x 2)))))",
+        expectedOutput: "'(2 4 6 8 20 24 50 140)",
+      },
+    ],
+    functionName: "insert-correctly-cps",
+    arguments: "(num ls k)",
+    timeLimit: 300000,
+    nonCPSName: "insert-correctly",
+    baseProc: `
+    (define insert-correctly (lambda (num ls)
+      (let helper ([prev-els '()]
+                   [lst ls])
+          (cond 
+              [(null? lst)
+                (append prev-els (list num))]
+              [(<= num (car lst))
+                (append prev-els (cons num lst))]
+              [else
+                (helper (append prev-els (list (car lst))) (cdr lst))]
+          )
+      )
+    ))
+    `,
+  },
+  
 ];
 var questionNumber = 1;
 var intervalID = 0;

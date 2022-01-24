@@ -90,10 +90,10 @@
 ;;InsertCorrectly - insert a num into its proper place in a list of numbers.
 ;; Took me 10-15min with some interruptions - Medium
 ;; Students would be given an implementation of: append-cps, cons-cps
-(define insertCorrectly-cps
+(define insert-correctly-cps
     (lambda (num ls k)
-        (let helper ([prev-els '()])
-                    ([lst ls])
+        (let helper ([prev-els '()]
+                    [lst ls])
             (cond
                 [(null? lst) 
                     (append-cps prev-els (list num) k)]
