@@ -90,6 +90,23 @@
                            )
                        )
                     )
+
+        (define-class case-exp Expression
+            (constructor (lambda (self val-exp then-exps)
+                            (cond
+                                [(not (Expression?? val-exp)) (console.log "Failed to create case-exp :: val-exp not an expression")]
+                                [(not (list? then-exps)) (console.log "Failed to create case-exp :: then-exps not a list")]
+                                [else
+                                    (begin
+                                        (set-obj! self 'val-exp val-exp)
+                                        (set-obj! self 'then-exps then-exps)
+                                    )
+                                ]
+                            )
+                                )
+                            )
+                        )
+
       (define-class lambda-exp Expression
           (constructor (lambda (self vars bodies)
                            (cond
@@ -234,6 +251,7 @@
       (define if-exp? (instance-of-type if-exp))
       (define if-only-exp? (instance-of-type if-only-exp))
       (define cond-exp? (instance-of-type cond-exp))
+      (define case-exp? (instance-of-type case-exp))
       (define filler-exp? (instance-of-type filler-exp))
       (define let-named-exp? (instance-of-type let-named-exp))
 
@@ -293,6 +311,11 @@
 
                             )
                           ]
+                          [(equal? pair-type-id 'case)
+                            (new case-exp (parse-exp (2nd datum))
+                            (map (lambda (cond-pair) (map parse-exp (cdr cond-pair))) (3rest datum))
+                            )
+                          ]
                           [else
                               (new app-exp (parse-exp (1st datum))
                                            (map parse-exp (cdr datum)))
@@ -314,6 +337,7 @@
               [(lit-exp? exp) exp]
               [(var-exp? exp) exp]
               [(cond-exp? exp) (new cond-exp (map syntax-expand exp.test-exps) (map (lambda (list-bodies) (map syntax-expand list-bodies)) exp.bodies))]
+              [(case-exp? exp) (new case-exp (syntax-expand exp.val-exp) (map (lambda (list-bodies) (map syntax-expand list-bodies)) exp.then-exps))]
               [(if-only-exp? exp) (new if-only-exp (syntax-expand exp.test-exp) (syntax-expand exp.then-exp) )]
               [(if-exp? exp) (new if-exp (syntax-expand exp.test-exp) (syntax-expand exp.then-exp) (syntax-expand exp.else-exp))]
               [(app-exp? exp)
@@ -463,6 +487,15 @@
                                         (helper (car rev-bodies) #t))) exp.bodies)
                         )
                       ]
+                      [(case-exp? exp)
+                      (begin
+                          (helper exp.val-exp #f)
+                          (map (lambda (ls-bodies) 
+                              (let ((rev-bodies (reverse ls-bodies)))
+                                  (map (lambda (body) (helper body #f)) (cdr rev-bodies))
+                                      (helper (car rev-bodies) #t))) exp.then-exps)
+                      )
+                    ]
                       [(lit-exp? exp) null]
                       [(var-exp? exp) null]
                       [else (console.log "ERROR: Non-tail-func tail parsing error?")]

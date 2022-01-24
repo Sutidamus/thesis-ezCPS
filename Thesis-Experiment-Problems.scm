@@ -22,7 +22,7 @@
 
 ;; Problem 3 - Easy/Medium
 ;; Roughly 5-10 min? (Didn't time)
-(define (set?-cps ls k)
+(define set?-cps (lambda (ls k)
     (cond
         [(null? ls) (apply-k k #t)]
         [(not (pair? ls)) (apply-k k #f)]
@@ -32,7 +32,7 @@
                     (if isInCdr 
                         (k #f)
                         (set?-cps (cdr ls) k)
-                        ))))]))
+                        ))))])))
 
 
 ;;
