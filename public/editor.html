@@ -196,6 +196,30 @@
                                )
       )
 
+      (define-class cond-exp Expression
+        (constructor (lambda (self test-exps bodies)
+            (cond
+                [(not (list-of Expression?? test-exps))(console.log "Failed to create cond-exp :: test-exps not a list of expression")]
+                [(not (list? bodies)) (console.log "Failed to create cond-exp :: bodies not a list of expression")]
+                [else
+                    (begin
+                        (set-obj! self 'test-exps test-exps)
+                        (set-obj! self 'bodies bodies)
+                    )
+                ]
+            )
+
+        ))
+
+    )
+
+    (define-class filler-exp Expression
+        (constructor (lambda (self )
+    )))
+
+
+      
+
       ;;===================
       ;;===================
       ;;  TYPE CHECKING
@@ -209,6 +233,8 @@
       (define app-exp? (instance-of-type app-exp))
       (define if-exp? (instance-of-type if-exp))
       (define if-only-exp? (instance-of-type if-only-exp))
+      (define cond-exp? (instance-of-type cond-exp))
+      (define filler-exp? (instance-of-type filler-exp))
       (define let-named-exp? (instance-of-type let-named-exp))
 
       ;;===================
@@ -261,6 +287,12 @@
                                   )
                               )
                           ]
+                          [(equal? pair-type-id 'cond)
+                            (new cond-exp (map (lambda (cond-pair) (parse-exp (car cond-pair))) (cdr datum))
+                                          (map (lambda (cond-pair) (map parse-exp (cdr cond-pair))) (cdr datum))
+
+                            )
+                          ]
                           [else
                               (new app-exp (parse-exp (1st datum))
                                            (map parse-exp (cdr datum)))
@@ -281,12 +313,12 @@
               [(let-named-exp? exp) (new let-named-exp exp.proc-id exp.ids (map syntax-expand exp.init-vals) (map syntax-expand exp.bodies))]
               [(lit-exp? exp) exp]
               [(var-exp? exp) exp]
+              [(cond-exp? exp) (new cond-exp (map syntax-expand exp.test-exps) (map (lambda (list-bodies) (map syntax-expand list-bodies)) exp.bodies))]
               [(if-only-exp? exp) (new if-only-exp (syntax-expand exp.test-exp) (syntax-expand exp.then-exp) )]
               [(if-exp? exp) (new if-exp (syntax-expand exp.test-exp) (syntax-expand exp.then-exp) (syntax-expand exp.else-exp))]
               [(app-exp? exp)
                   (if (var-exp? exp.rator)
                       (cond
-                          [(equal? exp.rator.id "cond") (cond-parse exp.rands)]
                           [(equal? exp.rator.id "case") (case-parse (car exp.rands) (cdr exp.rands))]
                           [(equal? exp.rator.id "or") (if (null? exp.rands)
                              (new lit-exp #f)
@@ -382,13 +414,19 @@
                           (in-tail-pos #t))
                   (cond
                       [(app-exp? exp)
-                          (map (lambda (rand) (helper rand #f)) exp.rands)
-                          (helper exp.rator #f)
-                          (if (not in-tail-pos)
-                              (if (not (primProcsJS.includes exp.rator.id))
-                                  (nonTailCalls.push exp.rator)
-                              )
-                          )
+                        (if (equal? exp.rator "define")
+                            (helper (cdar exp.rands) in-tail-pos)
+                            (begin
+                                (map (lambda (rand) (helper rand #f)) exp.rands)
+                                (helper exp.rator #f)
+                                (if (not in-tail-pos)
+                                    (if (not (primProcsJS.includes exp.rator.id))
+                                        (nonTailCalls.push exp.rator)
+                                    )
+                                )
+                            )
+                        )
+
                       ]
                       [(if-exp? exp)
                           (helper exp.test-exp #f)
@@ -415,6 +453,15 @@
                           (let ((rev-bodies (reverse exp.bodies)))
                               (map (lambda (body) (helper body #f)) (cdr rev-bodies))
                               (helper (car rev-bodies) #t))
+                      ]
+                      [(cond-exp? exp)
+                        (begin
+                            (map (lambda (tst) (helper tst #f)) exp.test-exps)
+                            (map (lambda (ls-bodies) 
+                                (let ((rev-bodies (reverse ls-bodies)))
+                                    (map (lambda (body) (helper body #f)) (cdr rev-bodies))
+                                        (helper (car rev-bodies) #t))) exp.bodies)
+                        )
                       ]
                       [(lit-exp? exp) null]
                       [(var-exp? exp) null]

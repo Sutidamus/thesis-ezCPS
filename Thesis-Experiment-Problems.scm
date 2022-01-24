@@ -1,22 +1,22 @@
 ;; Factorial-CPS - Easy
 ;; Took ~ 1min 30sec
-(define factorial-cps (n k)
+(define factorial-cps (lambda (n k)
     (if (or (eq? n 1) (eq? n 0))
         (apply-k k 1)
         (factorial-cps (- n 1) (make-k (lambda (computed-fact)
             (* n computed-fact)
         )))
-    )
+    ))
 )
 
 
 ;; Problem 2 - Easy
-(define (member?-cps item list k)
+(define member?-cps (lambda (item list k)
     (cond 
         [(null? list) (apply-k k #f)]
         [(eq? (car list) item) (apply-k k #t)]
         [else (member?-cps item (cdr list) k)]
-    )
+    ))
 )
 
 

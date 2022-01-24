@@ -21,6 +21,11 @@ const debugParseExp = (code) => {
   lips.exec(`(parse-exp ${code})`).then((r) => console.log(r));
 };
 
+const debugSyntaxExpand = (code) => {
+  console.log("Debugging Parse Exp for: ", code);
+  lips.exec(`(syntax-expand (parse-exp ${code}))`).then((r) => console.log(r));
+};
+
 const submissionDB = firebase.firestore().collection("Submissions");
 
 var { exec } = lips;
@@ -83,7 +88,8 @@ var originalPrimProcs = [
   "list-tail",
   "quote",
   "apply-k",
-  "make-k"
+  "make-k",
+  "or"
 ];
 var primProcsJS = [...originalPrimProcs];
 var editorBodies = [];
