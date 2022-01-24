@@ -876,6 +876,11 @@ function onSubmit() {
 }
 
 function showTailFeedback(submitAndMove) {
+  if(GROUP_NUMBER == 1){
+    alertBS();
+    return;
+  }
+
   let inTailForm =
     nonTailCalls.length == 0
       ? submissionState.IN_TAIL
