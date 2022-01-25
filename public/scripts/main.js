@@ -1063,7 +1063,7 @@ function submitToFirebaseAndMove(fullTestResults) {
   let editor = ace.edit("editor");
   let rawCode = editor.getValue();
   let timeRemaining = document.querySelector("#countdownTimer").innerHTML;
-  let minSec = timeRemaining.split(":").map(parseFloat);
+  // let minSec = timeRemaining.split(":").map(parseFloat);
 
   clearTheConsole();
 
@@ -1073,7 +1073,10 @@ function submitToFirebaseAndMove(fullTestResults) {
     group: GROUP_NUMBER,
     timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
-    tailFormCheckError: nonTailCalls.filter(el => (el.id == "error-syntax") || (el.id == "error-no-define")).length > 0,
+    tailFormCheckError:
+      nonTailCalls.filter(
+        (el) => el.id == "error-syntax" || el.id == "error-no-define"
+      ).length > 0,
     passedTests: fullTestResults.passFailTestResults,
     testResults: fullTestResults.actualResults,
     hasErrors: encounteredError,
@@ -1099,7 +1102,19 @@ function submitToFirebaseAndMove(fullTestResults) {
           }
         }, SUBMISSION_TIMEOUT);
       })
-      .catch((e) => console.log("Error Occured on submission", e));
+      .catch((e) => {
+        console.log("Error Occured on submission", e);
+        showTailFeedback(1);
+        questionNumber++;
+        setTimeout(() => {
+          if (questionNumber - 1 < questions.length) {
+            alertBS();
+            updateUIWithByQuestion(questionNumber);
+          } else {
+            window.location.href = "end.html";
+          }
+        }, SUBMISSION_TIMEOUT);
+      });
   } else {
     showTailFeedback(1);
     questionNumber++;
@@ -1119,14 +1134,16 @@ function submitToFirebase(fullTestResults) {
   let rawCode = editor.getValue();
   // let timeRemaining = document.querySelector("#countdownTimer").innerHTML;
   // let minSec = timeRemaining.split(":").map(parseFloat);
-  debugger;
   let submission = {
     code: rawCode,
     uuid: uuid,
     group: GROUP_NUMBER,
     timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
-    tailFormCheckError: nonTailCalls.filter(el => (el.id == "error-syntax") || (el.id == "error-no-define")).length > 0,
+    tailFormCheckError:
+      nonTailCalls.filter(
+        (el) => el.id == "error-syntax" || el.id == "error-no-define"
+      ).length > 0,
     passedTests: fullTestResults.passFailTestResults,
     testResults: fullTestResults.actualResults,
     hasErrors: encounteredError,
@@ -1162,7 +1179,6 @@ function submitToFirebase(fullTestResults) {
           ? submissionState.SYNTAX_ERROR
           : inTailForm;
 
-        debugger;
         console.log("Error Occured on submission", e);
         if (GROUP_NUMBER == 2) {
           alertTailFeedback(inTailForm);
