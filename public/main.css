@@ -102,3 +102,8 @@ pre {
 #countdown { 
     display: none;
 }
+
+.argument {
+    color:rgb(0, 90, 207);
+    font-style: oblique;
+}

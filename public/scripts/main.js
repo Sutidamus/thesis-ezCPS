@@ -4,6 +4,8 @@ const submissionState = {
   IN_TAIL: "IN_TAIL",
   NO_TAIL: "NO_TAIL",
   NO_CHECK_TAIL: "NO_CHECK_TAIL",
+  CHECK_TAIL: "CHECK_TAIL",
+  SYNTAX_ERROR: "SYNTAX_ERROR"
 };
 
 const runState = {
@@ -89,7 +91,8 @@ var originalPrimProcs = [
   "quote",
   "apply-k",
   "make-k",
-  "or"
+  "or",
+  "c-log",
 ];
 
 var primProcsJS = [...originalPrimProcs];
@@ -111,8 +114,7 @@ const uuid = new URLSearchParams(window.location.search).get("uuid");
 //var curEnv = lips.env;
 var questions = [
   {
-    description:
-      "Calculate and return the factorial of n. Expects n (a number) and k (a continuation) as parameters",
+    description: `Calculate and return the factorial of n. Expects <span class="argument">number and a continuation as parameters.</span>`,
     difficulty: 1,
     extraSubstantialProcedures: ["+", "map", "append"],
     baseProc: `(define factorial 
@@ -144,10 +146,9 @@ var questions = [
   },
 
   {
-    description:
-      "Returns true if x is an element of the list, and false otherwise. ",
+    description: `Returns true if x is an element of the list, and false otherwise. \n Expects <span class="argument">a value (character or number), a list, and continuations as arguments.</span>`,
     difficulty: 2,
-    extraSubstantialProcedures: ["pair?"],
+    extraSubstantialProcedures: [],
     name: "Member-CPS",
     testCases: [
       {
@@ -171,8 +172,10 @@ var questions = [
   },
 
   {
-    description:
-      "Determine is the given list is a set. Takes a list and continuation as arguments.",
+    description: `Determine is the given list is a set. Takes a <span class="argument">list and continuation as arguments.</span> \n
+      <u>You are given a working CPS implementation of member? called <em><b>g-member?-cps</b></em></u>.\n
+      g-member?-cps works the same way as member? EXCEPT it takes a continuation as an additional, final argument.
+      `,
     difficulty: 2,
     extraSubstantialProcedures: ["member"],
     name: "Set-CPS",
@@ -188,7 +191,7 @@ var questions = [
       {
         code: "(set?-cps '(y 2 2 g z) (lambda (v) (if v 'cat 'dog)) )",
         expectedOutput: "'dog",
-      }
+      },
     ],
     functionName: "set?-cps",
     arguments: "(ls k)",
@@ -209,10 +212,13 @@ var questions = [
   },
 
   {
-    description:
-      "Inserts a given number into its correct place in the list. Assume the list is ordered. Expects a number, list, and continuation as arguments.",
+    description: `Inserts a given number into its correct place in the list. Assume the list is ordered. \n 
+      Expects a <span class="argument">number, list, and continuation as arguments.</span> \n
+      <u>You are given a working implementation CPS of <em><b>append-cps</b></em> & <em><b>cons-cps</b></em></u> that work exactly like their \n
+      non-CPS versions EXCEPT they take a continuation as an additional, final argument.
+      `,
     difficulty: 2,
-    extraSubstantialProcedures: ["member"],
+    extraSubstantialProcedures: ["append", "cons"],
     name: "Insert-Correctly",
     testCases: [
       {
@@ -248,7 +254,6 @@ var questions = [
     ))
     `,
   },
-  
 ];
 var questionNumber = 1;
 var intervalID = 0;
@@ -301,7 +306,11 @@ async function checkTailCallSequentially(
   nonTailCalls = [];
 
   for (const func of codeBlocksPromises) {
-    await func();
+    try {
+      await func();
+    } catch (error) {
+      nonTailCalls.push({id: "error-syntax"})
+    }
   }
 
   //TODO: DON'T RUN IF GROUP 1
@@ -326,6 +335,7 @@ async function evaluatePromisesSequentially(lsPromises, callbackFunc, args) {
   if (lsPromises.length == 0) return;
   let results = [];
 
+  alertBS(submissionState.CHECK_TAIL);
   for (const func of lsPromises) {
     let res = await func();
     results.push(res);
@@ -411,7 +421,7 @@ function alertBS(status) {
         "success" +
         ' alert-dismissible" role="alert">' +
         `<h4 class="alert-heading">CODE SUBMITTED: Well done!</h4>
-          <h5>The code you submitted was in CPS form!</h5>
+          <h5>The code you submitted had all substantial procedures in tail position!</h5>
           <hr>
           <p class="mb-0">Moving to the next problem in 3 seconds.</p>`;
       break;
@@ -434,7 +444,7 @@ function alertBS(status) {
         "danger" +
         ' alert-dismissible" role="alert">' +
         `<h4 class="alert-heading">CODE SUBMITTED: Whoops!</h4>
-          <h5>The code you submitted NOT in CPS form!</h5>
+          <h5>The code you submitted contained substantial procedures in non-tail position, and is NOT in CPS form!</h5>
           <hr>
           <p class="mb-0">Moving to the next problem in 3 seconds.</p>`;
       break;
@@ -448,6 +458,14 @@ function alertBS(status) {
         <h5>The code you submitted did not have a (define) statement, so tail-form wasn't checked.</h5>
         <hr>
         <p class="mb-0">Moving to the next problem in 3 seconds.</p>`;
+      break;
+
+    case submissionState.CHECK_TAIL:
+      wrapper.innerHTML =
+        '<div class="alert alert-' +
+        "info" +
+        ' alert-dismissible" role="alert">' +
+        `<h4 class="alert-heading">Loading...Checking code for non-tail substantial procedure calls</h4>`;
       break;
 
     default:
@@ -484,7 +502,9 @@ function alertTailFeedback(status) {
         `<h4 class="alert-heading">IN TAIL FORM? <b>NO!</b></h4>
             <h5>The code you submitted contains the following substantial procedure calls in NON-tail position:</h5>
             <ul>
-              ${nonTailCalls.map((rator) => `<li class="nonTailCall">${rator.id}</li>`)}
+              ${nonTailCalls.map(
+                (rator) => `<li class="nonTailCall">${rator.id}</li>`
+              )}
             </ul>`;
       break;
 
@@ -497,6 +517,15 @@ function alertTailFeedback(status) {
           <h5>The code you submitted did not have a (define) statement, so tail-form wasn't checked.</h5>`;
       break;
 
+    case submissionState.SYNTAX_ERROR:
+        wrapper.innerHTML =
+          '<div class="alert alert-' +
+          "warning" +
+          ' alert-dismissible" role="alert">' +
+          `<h4 class="alert-heading">SYNTAX ERROR: <b>Couldn't Check for Non-Tail Calls</b></h4>
+            <h5>The code you submitted has a syntax error. Please resubmit after fixing your code.</h5>`;
+        break;
+        
     default:
       wrapper.innerHTML = "";
       break;
@@ -528,7 +557,8 @@ function processTestResults(results, args) {
       didPass = res[1];
       actual = res[0];
     } else {
-      actual = res[0].valueOf()[0].toString();
+      actual = res[0].valueOf()[0];
+      actual = actual ? actual.toString() : "";
       didPass = res[0].valueOf()[1];
     }
 
@@ -564,7 +594,7 @@ function processTestResults(results, args) {
 
     definePromises.push(tailCheckPromises);
   });
-
+  alertBS(submissionState.CHECK_TAIL);
   if (definePromises.length) {
     submit
       ? checkTailCallSequentially(
@@ -616,7 +646,7 @@ function updateUIWithByQuestion(questionNumber) {
     nonCPSName,
     baseProc,
   } = currentQuestion;
-  globalTimeRemaining = timeLimit/1000;
+  globalTimeRemaining = timeLimit / 1000;
   console.log("Description: ", description);
   console.log("Difficulty: ", difficulty);
   console.log("name: ", name);
@@ -642,6 +672,12 @@ function updateUIWithByQuestion(questionNumber) {
 
   //Clear text editor
   ace.edit("editor").setValue("");
+  ace.edit("editor").setValue(
+    `(define ${functionName} 
+        (lambda ${arguments}
+          )
+      )`
+    )
 
   // document.querySelector("table").style.display = "none";
   document.querySelector("tbody").innerHTML = "";
@@ -676,7 +712,7 @@ function updateUIWithByQuestion(questionNumber) {
 
     console.log("Pushing test case promise!!!");
   });
-  
+
   updateTimer(timeLimit);
 }
 
@@ -958,7 +994,6 @@ function onSubmit() {
 }
 
 function showTailFeedback(submitAndMove) {
-
   let inTailForm =
     nonTailCalls.length == 0
       ? submissionState.IN_TAIL
@@ -969,9 +1004,11 @@ function showTailFeedback(submitAndMove) {
       nonTailCalls[0].id == "error-no-define"
         ? submissionState.NO_CHECK_TAIL
         : inTailForm;
+    
+    inTailForm = nonTailCalls.filter(o => o.id == "error-syntax").length ? submissionState.SYNTAX_ERROR : inTailForm;
   }
 
-  if(GROUP_NUMBER == 1){
+  if (GROUP_NUMBER == 1) {
     submitAndMove ? alertBS(inTailForm) : alertBS();
     return;
   }
@@ -1043,7 +1080,7 @@ function submitToFirebase(passFailTestResults) {
     timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
     testResults: passFailTestResults,
-    submitted: false
+    submitted: false,
   };
 
   console.log("Submission to Firebase: ", submission);
@@ -1058,7 +1095,7 @@ function submitToFirebase(passFailTestResults) {
         console.log("Successful Submission: ", docId);
 
         showTailFeedback(0);
-        updateTimer(globalTimeRemaining*1000)
+        updateTimer(globalTimeRemaining * 1000);
       })
       .catch((e) => {
         document.querySelector("#runCodeBtn").disabled = false;
@@ -1074,14 +1111,14 @@ function submitToFirebase(passFailTestResults) {
 
           alertTailFeedback(inTailForm);
         } else alertBS();
-        updateTimer(globalTimeRemaining*1000)
+        updateTimer(globalTimeRemaining * 1000);
       });
   } else {
     document.querySelector("#runCodeBtn").disabled = false;
     document.querySelector("#submitCodeBtn").disabled = false;
 
     showTailFeedback(0);
-    updateTimer(globalTimeRemaining*1000)
+    updateTimer(globalTimeRemaining * 1000);
   }
 }
 
@@ -1093,7 +1130,7 @@ function updateTimer(timeLimit) {
 
   intervalID = setInterval(() => {
     onSubmit();
-  }, (globalTimeRemaining * 1000)+1000);
+  }, globalTimeRemaining * 1000 + 1000);
 
   // let now = new Date().getTime();
   // let countDownDate = now + timeLimit;
@@ -1101,11 +1138,11 @@ function updateTimer(timeLimit) {
   timerIntervalID = setInterval(() => {
     globalTimeRemaining--;
 
-    let minutes = Math.floor(globalTimeRemaining/60);;
-    let seconds = globalTimeRemaining%60;
+    let minutes = Math.floor(globalTimeRemaining / 60);
+    let seconds = globalTimeRemaining % 60;
 
     let secondsText = seconds;
-    secondsText = seconds < 10 ? `0${seconds}`: secondsText;
+    secondsText = seconds < 10 ? `0${seconds}` : secondsText;
 
     if (globalTimeRemaining >= 0) {
       document.querySelector(
