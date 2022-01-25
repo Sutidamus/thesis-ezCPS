@@ -38,16 +38,26 @@
         <br>
         <p class="explainP">
           <u>This site will test students' abilities to solve problems about CPS transformations (transforming non-CPS procedures to CPS)</u>.
-          With your help, we hope to gain a better understanding of what problems students struggle with when designing CPS code & how to solve them. 
+          With your help, we hope to gain a better understanding of what problems students struggle with when designing CPS code & how to best address them. 
         </p>
         <hr>
         <hr>
-        <p class="explainP"><b>NOTE:</b> For this exercise, continuations are in the form of <b>LAMBDAs</b>, and they are created using <code>make-k</code> and applied using <code>apply-k</code></p>
+        <p class="explainP"><b>NOTE:</b> For this exercise, continuations are represented using <b>LAMBDAs</b>, and they are created using <code>make-k</code> and applied using <code>apply-k</code></p>
         <pre id="instructionPre">
+
+;;=======================================
+;; Definitions
+;;---------------------------------------
 ;; These procedures are already defined, so you should NOT define them.
 
 (define apply-k (lambda (k v) (k v)))
 (define make-k (lambda (k) k))
+
+;;=======================================
+;; Example Use
+;;---------------------------------------
+(define sampleProc (make-k (lambda (v) (list))) )
+(apply-k sampleProc 2) ;; => (2) 
         </pre>
         <label for="groupSelect" id="selectLabel" class="text-center">Choose a Group:</label>
         <br>
@@ -58,12 +68,12 @@
         <br>
         <label for="recordData" id="dataLabel" class="text-center">May we record your submissions and results?</label>
         <select name="recordData" id="recordData">
-          <option value="1">YES</option>
           <option value="0">NO</option>
+          <option value="1">YES</option>
         </select>
         <br>
         <br>
-        <button class="btn btn-primary" class="text-center" >Start</button>
+        <button id="startButton" class="btn btn-primary" class="text-center" >Start</button>
       </div>
       
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

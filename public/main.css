@@ -64,7 +64,7 @@ header {
 
 #menuBody>div {
     margin: auto;
-    background-color: rgb(183, 232, 253);
+    background-color: rgb(208, 239, 252);
 }
 
 #selectLabel {
@@ -114,5 +114,10 @@ pre {
 
 #instructionPre{
     width: auto;
+    margin: auto;
+}
+
+#startButton {
+    display: block;
     margin: auto;
 }
