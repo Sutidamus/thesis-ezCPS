@@ -1141,7 +1141,24 @@ function submitToFirebase(passFailTestResults) {
     document.querySelector("#runCodeBtn").disabled = false;
     document.querySelector("#submitCodeBtn").disabled = false;
 
-    showTailFeedback(0);
+    // Tail Feedback should show even in case of error
+    alertBS();
+    let inTailForm =
+      nonTailCalls.length == 0
+        ? submissionState.IN_TAIL
+        : submissionState.NO_TAIL;
+
+    inTailForm = nonTailCalls.filter((o) => o.id == "error-syntax").length
+      ? submissionState.SYNTAX_ERROR
+      : inTailForm;
+
+    if (GROUP_NUMBER == 2) {
+      alertTailFeedback(inTailForm);
+    } else {
+      if (inTailForm == submissionState.SYNTAX_ERROR)
+        alertTailFeedback(inTailForm);
+      else alertBS();
+    }
     updateTimer(globalTimeRemaining * 1000);
   }
 }
