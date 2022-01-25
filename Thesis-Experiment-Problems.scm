@@ -11,11 +11,11 @@
 
 
 ;; Problem 2 - Easy
-(define member?-cps (lambda (item list k)
+(define member-cps (lambda (item ls k)
     (cond 
-        [(null? list) (apply-k k #f)]
-        [(eq? (car list) item) (apply-k k #t)]
-        [else (member?-cps item (cdr list) k)]
+        [(null? ls) (apply-k k #f)]
+        [(eq? (car ls) item) (apply-k k #t)]
+        [else (member-cps item (cdr ls) k)]
     ))
 )
 

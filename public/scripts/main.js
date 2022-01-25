@@ -130,15 +130,28 @@ var questions = [
     testCases: [
       {
         code: "(factorial-cps 0 list)",
-        expectedOutput: "'(1)",
+        expectedOutput: "(list 1)",
+        expectedDisplayOutput: "(1)"
       },
       {
         code: "(factorial-cps 1 list)",
-        expectedOutput: "'(1)",
+        expectedOutput: "(list 1)",
+        expectedDisplayOutput: "(1)"
       },
       {
-        code: "(factorial-cps 3 list)",
-        expectedOutput: "'(6)",
+        code: "(factorial-cps 3 (lambda (v) (cons v 4)))",
+        expectedOutput: "(cons 6 4)",
+        expectedDisplayOutput: "(6 . 4)"
+      },
+      {
+        code: "(factorial-cps 7 (lambda (v) (- v 1040)))",
+        expectedOutput: "4000",
+        expectedDisplayOutput: "4000"
+      },
+      {
+        code: "(factorial-cps 6 (lambda (v) v))",
+        expectedOutput: "720",
+        expectedDisplayOutput: "720"
       },
     ],
     timeLimit: 3600000,
@@ -152,8 +165,29 @@ var questions = [
     name: "Member-CPS",
     testCases: [
       {
+        code: "(member-cps 'b '(b c d 1 2 3 a) list)",
+        expectedOutput: "(list #t)",
+        expectedDisplayOutput: "(#t)"
+      },
+      {
+        code: "(member-cps 'a '(b b b) list)",
+        expectedOutput: "(list #f)",
+        expectedDisplayOutput: "(#f)"
+      },
+      {
+        code: "(member-cps 'zxy '() (lambda (v) (if v 'dog 'cat)) )",
+        expectedOutput: "'cat",
+        expectedDisplayOutput: "cat"
+      },
+      {
+        code: "(member-cps 1 '(2 (1 1) (4 5)) (lambda (v) (cons v 'nope)) )",
+        expectedOutput: "(cons #f 'nope)",
+        expectedDisplayOutput: "(#f . nope)"
+      },
+      {
         code: "(member-cps 'a '(b c d 1 2 3 a) list)",
-        expectedOutput: "'(#t)",
+        expectedOutput: "(list #t)",
+        expectedDisplayOutput: "'(#t)"
       },
     ],
     functionName: "member-cps",
@@ -176,21 +210,34 @@ var questions = [
       <u>You are given a working CPS implementation of member? called <em><b>g-member?-cps</b></em></u>.\n
       g-member?-cps works the same way as member? EXCEPT it takes a continuation as an additional, final argument.
       `,
-    difficulty: 2,
+    difficulty: 3,
     extraSubstantialProcedures: ["member"],
     name: "Set-CPS",
     testCases: [
       {
+        code: "(set?-cps '() (lambda (v) (cons v 4)) )",
+        expectedOutput: "(cons #t 4)",
+        expectedDisplayOutput: "(#t . 4)"
+      },
+      {
+        code: "(set?-cps 2456 (lambda (v) (cons v 4)) )",
+        expectedOutput: "(cons #f 4)",
+        expectedDisplayOutput: "(#f . 4)"
+      },
+      {
         code: "(set?-cps '(b c d 1 2 3 a) list)",
-        expectedOutput: "'(#t)",
+        expectedOutput: "(list #t)",
+        expectedDisplayOutput: "(#t)"
       },
       {
-        code: "(set?-cps '(b c d (a) 2 b a) (lambda(v)(cons v '())) )",
-        expectedOutput: "'(#f)",
+        code: "(set?-cps '(b c d (a) 2 b a) (lambda (v) (cons v '()) ) )",
+        expectedOutput: "(list #f)",
+        expectedDisplayOutput: "(#f)"
       },
       {
-        code: "(set?-cps '(y 2 2 g z) (lambda (v) (if v 'cat 'dog)) )",
-        expectedOutput: "'dog",
+        code: "(set?-cps '(y (2 y) g z) (lambda (v) (if v (cons v 'cat) (cons v 'dog))) )",
+        expectedOutput: "(cons #t 'cat)",
+        expectedDisplayOutput: "(#t . cat)"
       },
     ],
     functionName: "set?-cps",
@@ -217,21 +264,34 @@ var questions = [
       <u>You are given a working implementation CPS of <em><b>append-cps</b></em> & <em><b>cons-cps</b></em></u> that work exactly like their \n
       non-CPS versions EXCEPT they take a continuation as an additional, final argument.
       `,
-    difficulty: 2,
+    difficulty: 4,
     extraSubstantialProcedures: ["append", "cons"],
     name: "Insert-Correctly",
     testCases: [
       {
-        code: "(insert-correctly-cps 1 '(2 3 3 4 7) (lambda (v) v))",
-        expectedOutput: "'(1 2 3 3 4 7)",
+        code: "(insert-correctly-cps 400 '() (lambda (v) v))",
+        expectedOutput: "(list 400)",
+        expectedDisplayOutput: "(400)"
+      },
+      {
+        code: "(insert-correctly-cps 1 '(2 3) list)",
+        expectedOutput: "(list (list 1 2 3))",
+        expectedDisplayOutput: "((1 2 3))"
       },
       {
         code: "(insert-correctly-cps 10 '(1 2 3 4 12 25 70) list)",
         expectedOutput: "'((1 2 3 4 10 12 25 70))",
+        expectedDisplayOutput: "((1 2 3 4 10 12 25 70))"
       },
       {
-        code: "(insert-correctly-cps 10 '(1 2 3 4 12 25 70) (lambda (v) (map (lambda (x) (* x 2)))))",
-        expectedOutput: "'(2 4 6 8 20 24 50 140)",
+        code: "(insert-correctly-cps 140 '(17 35 70) (lambda (v) (map (lambda (x) (* x 2)) v)) )",
+        expectedOutput: "'(34 70 140 280)",
+        expectedDisplayOutput: "(34 70 140 280)"
+      },
+      {
+        code: "(insert-correctly-cps 4 '(1 2 3 4 4) (lambda (v) (map (lambda (x) (* x 3)) v) ) )",
+        expectedOutput: "'(3 6 9 12 12 12)",
+        expectedDisplayOutput: "(34 70 140 280)"
       },
     ],
     functionName: "insert-correctly-cps",
@@ -726,7 +786,7 @@ function updateUIWithByQuestion(questionNumber) {
     expected.id = `testCase${ind}Expected`;
 
     testCaseText.innerHTML = tc.code;
-    expected.innerHTML = tc.expectedOutput;
+    expected.innerHTML = tc.expectedDisplayOutput;
     actual.innerHTML = "-";
     passFail.innerHTML = "-";
 
@@ -793,7 +853,7 @@ function onCodeRun() {
         expected.id = `testCase${ind}Expected`;
 
         testCaseText.innerHTML = tc.code;
-        expected.innerHTML = tc.expectedOutput;
+        expected.innerHTML = tc.expectedDisplayOutput;
 
         console.log("Pushing test case promise!!!");
 
@@ -855,7 +915,7 @@ function onCodeError(en, rawCode) {
     expected.id = `testCase${ind}Expected`;
 
     testCaseText.innerHTML = tc.code;
-    expected.innerHTML = tc.expectedOutput;
+    expected.innerHTML = tc.expectedDisplayOutput;
 
     console.log("Pushing test case promise!!!");
 
@@ -908,7 +968,7 @@ function onCodeErrorRun(en, rawCode) {
     expected.id = `testCase${ind}Expected`;
 
     testCaseText.innerHTML = tc.code;
-    expected.innerHTML = tc.expectedOutput;
+    expected.innerHTML = tc.expectedDisplayOutput;
 
     console.log("Pushing test case promise!!!");
 
@@ -994,7 +1054,7 @@ function onSubmit() {
         expected.id = `testCase${ind}Expected`;
 
         testCaseText.innerHTML = tc.code;
-        expected.innerHTML = tc.expectedOutput;
+        expected.innerHTML = tc.expectedDisplayOutput;
 
         console.log("Pushing test case promise!!!");
 
