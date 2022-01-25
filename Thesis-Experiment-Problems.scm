@@ -19,6 +19,13 @@
     ))
 )
 
+(define g-member?-cps (lambda (item list k)
+    (cond 
+        [(null? list) (apply-k k #f)]
+        [(eq? (car list) item) (apply-k k #t)]
+        [else (g-member?-cps item (cdr list) k)]
+    ))
+)
 
 ;; Problem 3 - Easy/Medium
 ;; Roughly 5-10 min? (Didn't time)
@@ -27,7 +34,7 @@
         [(null? ls) (apply-k k #t)]
         [(not (pair? ls)) (apply-k k #f)]
         [else 
-            (member?-cps (car ls) (cdr ls) 
+            (g-member?-cps (car ls) (cdr ls) 
                 (make-k (lambda (isInCdr)
                     (if isInCdr 
                         (k #f)

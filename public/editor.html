@@ -21,7 +21,24 @@
     <!-- <script src="browserfs.min.js"></script> -->
     <link rel="stylesheet" href="main.css" />
     <script type="text/x-scheme" bootstrap>
-      ;; Useful functions
+      ;; Predefined Procedures
+      (define (append-cps ls1 ls2 k)
+        (apply-k k (append ls1 ls2))
+        )
+
+
+        (define (cons-cps el1 el2 k)
+            (apply-k k (cons el1 el2))
+        )
+
+        (define g-member?-cps (lambda (item list k)
+            (cond 
+                [(null? list) (apply-k k #f)]
+                [(eq? (car list) item) (apply-k k #t)]
+                [else (g-member?-cps item (cdr list) k)]
+            ))
+        )
+
 
       ; Procedures to make the parser a little bit saner.
       (define 1st car)

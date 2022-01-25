@@ -994,6 +994,7 @@ function submitToFirebaseAndMove(passFailTestResults) {
     timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
     testResults: passFailTestResults,
+    submitted: true,
   };
 
   console.log("Submission to Firebase: ", submission);
@@ -1042,6 +1043,7 @@ function submitToFirebase(passFailTestResults) {
     timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
     testResults: passFailTestResults,
+    submitted: false
   };
 
   console.log("Submission to Firebase: ", submission);
