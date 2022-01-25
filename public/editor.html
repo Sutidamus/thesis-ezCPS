@@ -343,6 +343,9 @@
                               (map (lambda (cond-pair) (map parse-exp (cdr cond-pair))) (3rest datum))
                               )
                             ]
+                            [(equal? pair-type-id 'quote)
+                                (new lit-exp (cdr datum))
+                            ]
                             [else
                                 (new app-exp (parse-exp (1st datum))
                                              (map parse-exp (cdr datum)))
@@ -380,6 +383,7 @@
                                        (new app-exp
                                          (new var-exp 'or)
                                          (cdr exp.rands))))))]
+                            [(equal? exp.rator.id "quote") ()]
                             [else (new app-exp exp.rator (map syntax-expand exp.rands))]
                         )
                         exp

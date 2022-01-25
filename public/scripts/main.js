@@ -1047,6 +1047,7 @@ function submitToFirebaseAndMove(passFailTestResults) {
     inTailForm: nonTailCalls.length == 0,
     testResults: passFailTestResults,
     submitted: true,
+    problem: questions[questionNumber - 1].name
   };
 
   console.log("Submission to Firebase: ", submission);
@@ -1096,6 +1097,7 @@ function submitToFirebase(passFailTestResults) {
     inTailForm: nonTailCalls.length == 0,
     testResults: passFailTestResults,
     submitted: false,
+    problem: questions[questionNumber - 1].name
   };
 
   console.log("Submission to Firebase: ", submission);
