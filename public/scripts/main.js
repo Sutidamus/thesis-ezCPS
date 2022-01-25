@@ -222,15 +222,15 @@ var questions = [
     name: "Insert-Correctly",
     testCases: [
       {
-        code: "(insert-correctly 1 '(2 3 3 4 7) (lambda (v) v))",
+        code: "(insert-correctly-cps 1 '(2 3 3 4 7) (lambda (v) v))",
         expectedOutput: "'(1 2 3 3 4 7)",
       },
       {
-        code: "(insert-correctly 10 '(1 2 3 4 12 25 70) list)",
+        code: "(insert-correctly-cps 10 '(1 2 3 4 12 25 70) list)",
         expectedOutput: "'((1 2 3 4 10 12 25 70))",
       },
       {
-        code: "(insert-correctly 10 '(1 2 3 4 12 25 70) (lambda (v) (map (lambda (x) (* x 2)))))",
+        code: "(insert-correctly-cps 10 '(1 2 3 4 12 25 70) (lambda (v) (map (lambda (x) (* x 2)))))",
         expectedOutput: "'(2 4 6 8 20 24 50 140)",
       },
     ],
