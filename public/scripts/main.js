@@ -5,7 +5,7 @@ const submissionState = {
   NO_TAIL: "NO_TAIL",
   NO_CHECK_TAIL: "NO_CHECK_TAIL",
   CHECK_TAIL: "CHECK_TAIL",
-  SYNTAX_ERROR: "SYNTAX_ERROR"
+  SYNTAX_ERROR: "SYNTAX_ERROR",
 };
 
 const runState = {
@@ -309,7 +309,7 @@ async function checkTailCallSequentially(
     try {
       await func();
     } catch (error) {
-      nonTailCalls.push({id: "error-syntax"})
+      nonTailCalls.push({ id: "error-syntax" });
     }
   }
 
@@ -468,6 +468,17 @@ function alertBS(status) {
         `<h4 class="alert-heading">Loading...Checking code for non-tail substantial procedure calls</h4>`;
       break;
 
+    case submissionState.SYNTAX_ERROR:
+      wrapper.innerHTML =
+        '<div class="alert alert-' +
+        "warning" +
+        ' alert-dismissible" role="alert">' +
+        `<h4 class="alert-heading">SYNTAX ERROR: <b>Couldn't Check for Non-Tail Calls</b></h4>
+          <h5>The code you submitted has a syntax error.</h5>
+          <hr>
+          <p class="mb-0">Moving to the next problem in 3 seconds.</p>`;
+      break;
+
     default:
       wrapper.innerHTML = "";
       break;
@@ -518,14 +529,14 @@ function alertTailFeedback(status) {
       break;
 
     case submissionState.SYNTAX_ERROR:
-        wrapper.innerHTML =
-          '<div class="alert alert-' +
-          "warning" +
-          ' alert-dismissible" role="alert">' +
-          `<h4 class="alert-heading">SYNTAX ERROR: <b>Couldn't Check for Non-Tail Calls</b></h4>
+      wrapper.innerHTML =
+        '<div class="alert alert-' +
+        "warning" +
+        ' alert-dismissible" role="alert">' +
+        `<h4 class="alert-heading">SYNTAX ERROR: <b>Couldn't Check for Non-Tail Calls</b></h4>
             <h5>The code you submitted has a syntax error. Please resubmit after fixing your code.</h5>`;
-        break;
-        
+      break;
+
     default:
       wrapper.innerHTML = "";
       break;
@@ -677,7 +688,7 @@ function updateUIWithByQuestion(questionNumber) {
         (lambda ${arguments}
           )
       )`
-    )
+  );
 
   // document.querySelector("table").style.display = "none";
   document.querySelector("tbody").innerHTML = "";
@@ -1004,12 +1015,16 @@ function showTailFeedback(submitAndMove) {
       nonTailCalls[0].id == "error-no-define"
         ? submissionState.NO_CHECK_TAIL
         : inTailForm;
-    
-    inTailForm = nonTailCalls.filter(o => o.id == "error-syntax").length ? submissionState.SYNTAX_ERROR : inTailForm;
+
+    inTailForm = nonTailCalls.filter((o) => o.id == "error-syntax").length
+      ? submissionState.SYNTAX_ERROR
+      : inTailForm;
   }
 
   if (GROUP_NUMBER == 1) {
-    submitAndMove ? alertBS(inTailForm) : alertBS();
+    if (inTailForm == submissionState.SYNTAX_ERROR) {
+      submitAndMove ? alertBS(inTailForm) : alertTailFeedback(inTailForm);
+    } else submitAndMove ? alertBS(inTailForm) : alertBS();
     return;
   }
 
@@ -1102,15 +1117,24 @@ function submitToFirebase(passFailTestResults) {
         document.querySelector("#submitCodeBtn").disabled = false;
 
         // Tail Feedback should show even in case of error
+        let inTailForm =
+          nonTailCalls.length == 0
+            ? submissionState.IN_TAIL
+            : submissionState.NO_TAIL;
+
+        inTailForm = nonTailCalls.filter((o) => o.id == "error-syntax").length
+          ? submissionState.SYNTAX_ERROR
+          : inTailForm;
+
+        debugger;
         console.log("Error Occured on submission", e);
         if (GROUP_NUMBER == 2) {
-          let inTailForm =
-            nonTailCalls.length == 0
-              ? submissionState.IN_TAIL
-              : submissionState.NO_TAIL;
-
           alertTailFeedback(inTailForm);
-        } else alertBS();
+        } else {
+          if (inTailForm == submissionState.SYNTAX_ERROR)
+            alertTailFeedback(inTailForm);
+          else alertBS();
+        }
         updateTimer(globalTimeRemaining * 1000);
       });
   } else {
