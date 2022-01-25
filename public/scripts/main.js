@@ -260,6 +260,7 @@ var intervalID = 0;
 var timerIntervalID = 0;
 var globalTimeRemaining = 0;
 var { exec, parse } = lips;
+var encounteredError = false;
 var curTestCases = [];
 const htmlToElement = (html) => {
   const placeholder = document.createElement("div");
@@ -300,7 +301,7 @@ function clearTheConsole() {
 async function checkTailCallSequentially(
   codeBlocksPromises,
   callbackFunc,
-  passFailTestResults
+  fullTestResults
 ) {
   if (codeBlocksPromises.length == 0) return;
   nonTailCalls = [];
@@ -326,8 +327,8 @@ async function checkTailCallSequentially(
   }
 
   if (callbackFunc) {
-    console.log("Chekcing tail calls: ", passFailTestResults);
-    callbackFunc(passFailTestResults);
+    console.log("Chekcing tail calls: ", fullTestResults);
+    callbackFunc(fullTestResults);
   }
 }
 
@@ -554,10 +555,12 @@ function resizeInput() {
 
 function processTestResults(results, args) {
   console.log("Test Case results: ", results);
-
   let testCaseTable = document.querySelector("table");
   let { defineBodies, submit } = args;
   let passedTestResults = [];
+  let actualResults = [];
+
+  let fullTestResults;
 
   results.forEach((res, ind) => {
     let didPass = true;
@@ -585,6 +588,7 @@ function processTestResults(results, args) {
     document.querySelector(`#testCase${ind}Actual`).innerHTML = actual;
 
     didPass ? passedTestResults.push(true) : passedTestResults.push(false);
+    actualResults.push(actual);
   });
 
   console.log("Would be updating test case UI");
@@ -605,18 +609,23 @@ function processTestResults(results, args) {
 
     definePromises.push(tailCheckPromises);
   });
+
+  fullTestResults = {
+    passFailTestResults: passedTestResults,
+    actualResults: actualResults,
+  };
   alertBS(submissionState.CHECK_TAIL);
   if (definePromises.length) {
     submit
       ? checkTailCallSequentially(
           definePromises,
           submitToFirebaseAndMove,
-          passedTestResults
+          fullTestResults
         )
       : checkTailCallSequentially(
           definePromises,
           submitToFirebase,
-          passedTestResults
+          fullTestResults
         );
   } else {
     nonTailCalls = [];
@@ -633,8 +642,8 @@ function processTestResults(results, args) {
     nonTailCalls.push({ id: "error-no-define" });
     // definePromises.push()
     submit
-      ? submitToFirebaseAndMove(passedTestResults)
-      : submitToFirebase(passedTestResults);
+      ? submitToFirebaseAndMove(fullTestResults)
+      : submitToFirebase(fullTestResults);
   }
 }
 
@@ -730,6 +739,7 @@ function updateUIWithByQuestion(questionNumber) {
 function onCodeRun() {
   clearInterval(timerIntervalID);
   clearInterval(intervalID);
+  encounteredError = false;
 
   let currentQuestion = questions[questionNumber - 1];
   document.querySelector("#submitCodeBtn").disabled = true;
@@ -793,7 +803,10 @@ function onCodeRun() {
 
             console.log(co);
             resolve(
-              lips.exec(co, en).catch((e) => [`Error: ${e.message}`, false])
+              lips.exec(co, en).catch((e) => {
+                encounteredError = true;
+                return [`Error: ${e.message}`, false];
+              })
             );
           });
 
@@ -851,7 +864,12 @@ function onCodeError(en, rawCode) {
         let co = `(let ([result ${tc.code}]) (values result (equal? result ${tc.expectedOutput})))`;
 
         console.log(co);
-        resolve(lips.exec(co, en).catch((e) => [`Error: ${e.message}`, false]));
+        resolve(
+          lips.exec(co, en).catch((e) => {
+            encounteredError = true;
+            return [`Error: ${e.message}`, false];
+          })
+        );
       });
 
     promises.push(testCaseCheck);
@@ -899,7 +917,12 @@ function onCodeErrorRun(en, rawCode) {
         let co = `(let ([result ${tc.code}]) (values result (equal? result ${tc.expectedOutput})))`;
 
         console.log(co);
-        resolve(lips.exec(co, en).catch((e) => [`Error: ${e.message}`, false]));
+        resolve(
+          lips.exec(co, en).catch((e) => {
+            encounteredError = true;
+            return [`Error: ${e.message}`, false];
+          })
+        );
       });
 
     promises.push(testCaseCheck);
@@ -917,6 +940,8 @@ function onCodeErrorRun(en, rawCode) {
 function onSubmit() {
   clearInterval(timerIntervalID);
   clearInterval(intervalID);
+  encounteredError = false;
+
   let currentQuestion = questions[questionNumber - 1];
   document.querySelector("#submitCodeBtn").disabled = true;
   document.querySelector("#runCodeBtn").disabled = true;
@@ -932,7 +957,7 @@ function onSubmit() {
   codeConsole.value = "";
   let defineBodies = rawCode.split("(define ").slice(1);
   lips
-    .exec( `(unset! ${functionName})\n` + rawCode)
+    .exec(`(unset! ${functionName})\n` + rawCode)
     .then((result) => {
       result.forEach((res) => {
         if (res) {
@@ -979,7 +1004,10 @@ function onSubmit() {
 
             console.log(co);
             resolve(
-              lips.exec(co, en).catch((e) => [`Error: ${e.message}`, false])
+              lips.exec(co, en).catch((e) => {
+                encounteredError = true;
+                return [`Error: ${e.message}`, false];
+              })
             );
           });
 
@@ -1031,7 +1059,7 @@ function showTailFeedback(submitAndMove) {
   submitAndMove ? alertBS(inTailForm) : alertTailFeedback(inTailForm);
 }
 
-function submitToFirebaseAndMove(passFailTestResults) {
+function submitToFirebaseAndMove(fullTestResults) {
   let editor = ace.edit("editor");
   let rawCode = editor.getValue();
   let timeRemaining = document.querySelector("#countdownTimer").innerHTML;
@@ -1045,9 +1073,12 @@ function submitToFirebaseAndMove(passFailTestResults) {
     group: GROUP_NUMBER,
     timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
-    testResults: passFailTestResults,
+    tailFormCheckError: nonTailCalls.filter(el => (el.id == "error-syntax") || (el.id == "error-no-define")).length > 0,
+    passedTests: fullTestResults.passFailTestResults,
+    testResults: fullTestResults.actualResults,
+    hasErrors: encounteredError,
     submitted: true,
-    problem: questions[questionNumber - 1].name
+    problem: questions[questionNumber - 1].name,
   };
 
   console.log("Submission to Firebase: ", submission);
@@ -1083,21 +1114,24 @@ function submitToFirebaseAndMove(passFailTestResults) {
   }
 }
 
-function submitToFirebase(passFailTestResults) {
+function submitToFirebase(fullTestResults) {
   let editor = ace.edit("editor");
   let rawCode = editor.getValue();
   // let timeRemaining = document.querySelector("#countdownTimer").innerHTML;
   // let minSec = timeRemaining.split(":").map(parseFloat);
-
+  debugger;
   let submission = {
     code: rawCode,
     uuid: uuid,
     group: GROUP_NUMBER,
     timeRemaining: globalTimeRemaining,
     inTailForm: nonTailCalls.length == 0,
-    testResults: passFailTestResults,
+    tailFormCheckError: nonTailCalls.filter(el => (el.id == "error-syntax") || (el.id == "error-no-define")).length > 0,
+    passedTests: fullTestResults.passFailTestResults,
+    testResults: fullTestResults.actualResults,
+    hasErrors: encounteredError,
     submitted: false,
-    problem: questions[questionNumber - 1].name
+    problem: questions[questionNumber - 1].name,
   };
 
   console.log("Submission to Firebase: ", submission);
