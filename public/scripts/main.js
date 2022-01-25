@@ -734,7 +734,7 @@ function onCodeRun() {
   let currentQuestion = questions[questionNumber - 1];
   document.querySelector("#submitCodeBtn").disabled = true;
   document.querySelector("#runCodeBtn").disabled = true;
-  let { testCases, arguments } = currentQuestion;
+  let { testCases, arguments, functionName } = currentQuestion;
 
   var editor = ace.edit("editor");
   let rawCode = editor.getValue();
@@ -746,7 +746,7 @@ function onCodeRun() {
   codeConsole.value = "";
   let defineBodies = rawCode.split("(define ").slice(1);
   lips
-    .exec(rawCode)
+    .exec(`(unset! ${functionName})\n` + rawCode)
     .then((result) => {
       result.forEach((res) => {
         if (res) {
@@ -920,7 +920,7 @@ function onSubmit() {
   let currentQuestion = questions[questionNumber - 1];
   document.querySelector("#submitCodeBtn").disabled = true;
   document.querySelector("#runCodeBtn").disabled = true;
-  let { testCases, arguments } = currentQuestion;
+  let { testCases, arguments, functionName } = currentQuestion;
 
   var editor = ace.edit("editor");
   let rawCode = editor.getValue();
@@ -932,7 +932,7 @@ function onSubmit() {
   codeConsole.value = "";
   let defineBodies = rawCode.split("(define ").slice(1);
   lips
-    .exec(rawCode)
+    .exec( `(unset! ${functionName})\n` + rawCode)
     .then((result) => {
       result.forEach((res) => {
         if (res) {
