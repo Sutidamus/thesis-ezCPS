@@ -42,6 +42,13 @@
         </p>
         <hr>
         <hr>
+        <p class="explainP"><b>NOTE:</b> For this exercise, continuations are in the form of <b>LAMBDAs</b>, and they are created using <code>make-k</code> and applied using <code>apply-k</code></p>
+        <pre id="instructionPre">
+;; These procedures are already defined, so you should NOT define them.
+
+(define apply-k (lambda (k v) (k v)))
+(define make-k (lambda (k) k))
+        </pre>
         <label for="groupSelect" id="selectLabel" class="text-center">Choose a Group:</label>
         <br>
         <select name="groupSelect" id="groupSelect">

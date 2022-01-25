@@ -111,3 +111,8 @@ pre {
     color: rgb(0, 90, 207);
     font-style: oblique;
 }
+
+#instructionPre{
+    width: auto;
+    margin: auto;
+}

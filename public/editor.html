@@ -30,6 +30,10 @@
     </script>
     <script type="text/x-scheme" bootstrap>
         ;; Predefined Procedures
+        
+        (define apply-k (lambda (k v) (k v)))
+        (define make-k (lambda (k) k))
+
         (define (append-cps ls1 ls2 k)
           (apply-k k (append ls1 ls2))
           )
@@ -58,9 +62,6 @@
         (define 3rest cddr)
         (define 4th cadddr)
         (define 4rest cdddr)
-
-          (define apply-k (lambda (k v) (k v)))
-          (define make-k (lambda (k) k))
 
         (define list-of
           (lambda (pred . l)
