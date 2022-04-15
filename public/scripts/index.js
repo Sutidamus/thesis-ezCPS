@@ -4,6 +4,10 @@ document.querySelector("button").onclick = () => {
 
     let canCollectData = parseInt(document.querySelector("#recordData").value)
 
-    let uuid = uuidv4();
+    let uuid = document.querySelector("#customUUIDInput").value;
+
+    if(uuid.length === 0){
+        uuid = uuidv4();
+    }
     window.location.href = `editor.html?group=${group}&uuid=${uuid}&data=${canCollectData}`
 }

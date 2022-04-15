@@ -116,7 +116,7 @@ var questions = [
   {
     description: `Calculate and return the factorial of n. Expects <span class="argument">number and a continuation as parameters.</span>`,
     difficulty: 1,
-    extraSubstantialProcedures: ["+", "map", "append"],
+    extraSubstantialProcedures: [],
     baseProc: `(define factorial 
         (lambda (n)
           (if (or (eq? 0 n) (eq? 1 n))
@@ -131,27 +131,27 @@ var questions = [
       {
         code: "(factorial-cps 0 list)",
         expectedOutput: "(list 1)",
-        expectedDisplayOutput: "(1)"
+        expectedDisplayOutput: "(1)",
       },
       {
         code: "(factorial-cps 1 list)",
         expectedOutput: "(list 1)",
-        expectedDisplayOutput: "(1)"
+        expectedDisplayOutput: "(1)",
       },
       {
         code: "(factorial-cps 3 (lambda (v) (cons v 4)))",
         expectedOutput: "(cons 6 4)",
-        expectedDisplayOutput: "(6 . 4)"
+        expectedDisplayOutput: "(6 . 4)",
       },
       {
         code: "(factorial-cps 7 (lambda (v) (- v 1040)))",
         expectedOutput: "4000",
-        expectedDisplayOutput: "4000"
+        expectedDisplayOutput: "4000",
       },
       {
         code: "(factorial-cps 6 (lambda (v) v))",
         expectedOutput: "720",
-        expectedDisplayOutput: "720"
+        expectedDisplayOutput: "720",
       },
     ],
     timeLimit: 3600000,
@@ -167,27 +167,27 @@ var questions = [
       {
         code: "(member-cps 'b '(b c d 1 2 3 a) list)",
         expectedOutput: "(list #t)",
-        expectedDisplayOutput: "(#t)"
+        expectedDisplayOutput: "(#t)",
       },
       {
         code: "(member-cps 'a '(b b b) list)",
         expectedOutput: "(list #f)",
-        expectedDisplayOutput: "(#f)"
+        expectedDisplayOutput: "(#f)",
       },
       {
         code: "(member-cps 'zxy '() (lambda (v) (if v 'dog 'cat)) )",
         expectedOutput: "'cat",
-        expectedDisplayOutput: "cat"
+        expectedDisplayOutput: "cat",
       },
       {
         code: "(member-cps 1 '(2 (1 1) (4 5)) (lambda (v) (cons v 'nope)) )",
         expectedOutput: "(cons #f 'nope)",
-        expectedDisplayOutput: "(#f . nope)"
+        expectedDisplayOutput: "(#f . nope)",
       },
       {
-        code: "(member-cps 'a '(b c d 1 2 3 a) list)",
-        expectedOutput: "(list #t)",
-        expectedDisplayOutput: "'(#t)"
+        code: "(member-cps 'a '(c d 1 2 3 a) (lambda (v) (cons 'result v) ))",
+        expectedOutput: "(cons 'result #t)",
+        expectedDisplayOutput: "'(#t)",
       },
     ],
     functionName: "member-cps",
@@ -217,27 +217,27 @@ var questions = [
       {
         code: "(set?-cps '() (lambda (v) (cons v 4)) )",
         expectedOutput: "(cons #t 4)",
-        expectedDisplayOutput: "(#t . 4)"
+        expectedDisplayOutput: "(#t . 4)",
       },
       {
         code: "(set?-cps 2456 (lambda (v) (cons v 4)) )",
         expectedOutput: "(cons #f 4)",
-        expectedDisplayOutput: "(#f . 4)"
+        expectedDisplayOutput: "(#f . 4)",
       },
       {
         code: "(set?-cps '(b c d 1 2 3 a) list)",
         expectedOutput: "(list #t)",
-        expectedDisplayOutput: "(#t)"
+        expectedDisplayOutput: "(#t)",
       },
       {
         code: "(set?-cps '(b c d (a) 2 b a) (lambda (v) (cons v '()) ) )",
         expectedOutput: "(list #f)",
-        expectedDisplayOutput: "(#f)"
+        expectedDisplayOutput: "(#f)",
       },
       {
         code: "(set?-cps '(y (2 y) g z) (lambda (v) (if v (cons v 'cat) (cons v 'dog))) )",
         expectedOutput: "(cons #t 'cat)",
-        expectedDisplayOutput: "(#t . cat)"
+        expectedDisplayOutput: "(#t . cat)",
       },
     ],
     functionName: "set?-cps",
@@ -271,27 +271,27 @@ var questions = [
       {
         code: "(insert-correctly-cps 400 '() (lambda (v) v))",
         expectedOutput: "(list 400)",
-        expectedDisplayOutput: "(400)"
+        expectedDisplayOutput: "(400)",
       },
       {
         code: "(insert-correctly-cps 1 '(2 3) list)",
         expectedOutput: "(list (list 1 2 3))",
-        expectedDisplayOutput: "((1 2 3))"
+        expectedDisplayOutput: "((1 2 3))",
       },
       {
         code: "(insert-correctly-cps 10 '(1 2 3 4 12 25 70) list)",
         expectedOutput: "'((1 2 3 4 10 12 25 70))",
-        expectedDisplayOutput: "((1 2 3 4 10 12 25 70))"
+        expectedDisplayOutput: "((1 2 3 4 10 12 25 70))",
       },
       {
         code: "(insert-correctly-cps 140 '(17 35 70) (lambda (v) (map (lambda (x) (* x 2)) v)) )",
         expectedOutput: "'(34 70 140 280)",
-        expectedDisplayOutput: "(34 70 140 280)"
+        expectedDisplayOutput: "(34 70 140 280)",
       },
       {
         code: "(insert-correctly-cps 4 '(1 2 3 4 4) (lambda (v) (map (lambda (x) (* x 3)) v) ) )",
         expectedOutput: "'(3 6 9 12 12 12)",
-        expectedDisplayOutput: "(34 70 140 280)"
+        expectedDisplayOutput: "(3 6 9 12 12 12)",
       },
     ],
     functionName: "insert-correctly-cps",
@@ -595,7 +595,7 @@ function alertTailFeedback(status) {
         "warning" +
         ' alert-dismissible" role="alert">' +
         `<h4 class="alert-heading">SYNTAX ERROR: <b>Couldn't Check for Non-Tail Calls</b></h4>
-            <h5>The code you submitted has a syntax error. Please resubmit after fixing your code.</h5>`;
+            <h5>The code you submitted has a syntax error. Please re-run after fixing your code.</h5>`;
       break;
 
     default:
@@ -747,6 +747,10 @@ function updateUIWithByQuestion(questionNumber) {
     substantialProcs.appendChild(htmlToElement(`<li>${procID}</li>`));
     primProcsJS = primProcsJS.filter((v) => v != procID);
   });
+
+  if(!extraSubstantialProcedures.length){
+    substantialProcs.appendChild(htmlToElement(`<li><em>NONE: There are no additional substantial procedures for this problem</em></li>`))
+  }
 
   curTestCases = testCases;
 
@@ -1137,8 +1141,14 @@ function submitToFirebaseAndMove(fullTestResults) {
       nonTailCalls.filter(
         (el) => el.id == "error-syntax" || el.id == "error-no-define"
       ).length > 0,
+    test1Score: fullTestResults.passFailTestResults[0] ? 1 : 0,
+    test2Score: fullTestResults.passFailTestResults[1] ? 1 : 0,
+    test3Score: fullTestResults.passFailTestResults[2] ? 1 : 0,
+    test4Score: fullTestResults.passFailTestResults[3] ? 1 : 0,
+    test5Score: fullTestResults.passFailTestResults[4] ? 1 : 0,
     passedTests: fullTestResults.passFailTestResults,
     testResults: fullTestResults.actualResults,
+    submissionTime: firebase.firestore.Timestamp.now(),
     hasErrors: encounteredError,
     submitted: true,
     problem: questions[questionNumber - 1].name,
@@ -1204,8 +1214,14 @@ function submitToFirebase(fullTestResults) {
       nonTailCalls.filter(
         (el) => el.id == "error-syntax" || el.id == "error-no-define"
       ).length > 0,
+    test1Score: fullTestResults.passFailTestResults[0] ? 1 : 0,
+    test2Score: fullTestResults.passFailTestResults[1] ? 1 : 0,
+    test3Score: fullTestResults.passFailTestResults[2] ? 1 : 0,
+    test4Score: fullTestResults.passFailTestResults[3] ? 1 : 0,
+    test5Score: fullTestResults.passFailTestResults[4] ? 1 : 0,
     passedTests: fullTestResults.passFailTestResults,
     testResults: fullTestResults.actualResults,
+    submissionTime: firebase.firestore.Timestamp.now(),
     hasErrors: encounteredError,
     submitted: false,
     problem: questions[questionNumber - 1].name,

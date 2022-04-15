@@ -80,7 +80,8 @@ header {
 }
 
 #btnRow {
-    margin-left: 2%;
+    display: flex;
+    justify-content: space-between;
     margin-top: 1%;
 }
 
